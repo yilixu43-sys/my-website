@@ -1,0 +1,14 @@
+**/local.properties
+**/.gradle/
+**/.kotlin/
+**/.idea/
+**/build/
+*.iml
+.android/
+
+/deliverables/
+*.apk
+*.zip
+*.jks
+*.keystore
+/build-viewport.log

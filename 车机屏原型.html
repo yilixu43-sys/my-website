@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-<html lang="zh-CN" data-canvas-width="1920" data-canvas-height="1200" style="width:1920px;height:1200px">
+﻿<!DOCTYPE html>
+<html lang="zh-CN" data-canvas-width="1920" data-canvas-height="1200">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,7 +21,7 @@
   src:url("https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao/infinite-canvas/fonts/v1/source-han-sans-sc-vf/source-han-sans-sc-vf.otf") format("opentype");
   font-weight:250 900;font-style:normal;font-display:swap;
 }
-html,body{height:100%}
+html,body{width:100%;height:100%}
 body{background:#07080A;font-family:var(--font);color:var(--text);overflow:hidden;display:block}
 #wrap{position:static}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
@@ -30,7 +30,7 @@ img{display:block}
 /* ============ 设备外框（1920×1200 逻辑画布，16:10） ============ */
 #wrap{position:relative;line-height:1.5}
 .device{width:1920px;height:1200px;background:var(--bg);border-radius:24px;overflow:hidden;position:relative;
-  transform-origin:center center;display:flex;flex-direction:column;
+  transform-origin:0 0;display:flex;flex-direction:column;
   box-shadow:inset 0 0 0 1px #2a2d33}
 .device::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:60;
   background:radial-gradient(1200px 700px at 70% -10%,rgba(239,91,36,.07),transparent 60%)}
@@ -164,9 +164,9 @@ img{display:block}
 .live-dot{width:10px;height:10px;border-radius:50%;background:var(--green);animation:pulse 1.4s infinite}
 </style>
 </head>
-<body style="width:1920px;height:1200px">
+<body>
 <div id="wrap">
-  <div class="device" id="device" data-canvas-root style="width:1920px;height:1200px">
+  <div class="device" id="device" data-canvas-root>
     <!-- ===== 顶部状态栏 ===== -->
     <div class="topbar">
       <div class="tb-brand" onclick="App.goWelcome()" title="回到迎宾页">
@@ -479,7 +479,7 @@ img{display:block}
         <div style="font-size:18px;color:var(--body)">一键呼叫远程客服与安全中心</div>
       </div>
       <div class="card pad-s" style="display:flex;flex-direction:column;gap:14px">
-        <button class="btn btn-ghost" style="width:100%" onclick="App.toast('演示：正在接通客服 13962243668')">
+        <button class="btn btn-ghost" style="width:100%" onclick="App.toast('演示：客服界面，未实际呼叫')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 4h4l2 5-3 2a12 12 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z"/></svg>语音客服 13962243668</button>
         <button class="btn btn-danger" style="width:100%" onclick="App.confirmStop()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>紧急停车</button>
@@ -578,13 +578,16 @@ const App = (() => {
   /* ---------- 画布自适应缩放 ---------- */
   function fit(){
     const wrap=$('wrap'), dev=$('device');
-    if(navigator.webdriver){ wrap.style.transform=''; dev.style.transform=''; return; }
-    const vw=window.innerWidth, vh=window.innerHeight;
-    const scale = Math.min(vw/1920, vh/1200);
-    // 先把画布中心平移到视口中心，再缩放，保证任何窗口下完整可见
-    wrap.style.transform = 'translate('+(vw/2-960)+'px,'+(vh/2-600)+'px)';
-    dev.style.transform = 'scale('+scale+')';
+    const vw=window.visualViewport?.width || document.documentElement.clientWidth;
+    const vh=window.visualViewport?.height || document.documentElement.clientHeight;
+    const scale=Math.min(vw/1920,vh/1200);
+    wrap.style.transform='none';
+    wrap.style.position='absolute';
+    wrap.style.left=((vw-1920*scale)/2)+'px';
+    wrap.style.top=((vh-1200*scale)/2)+'px';
+    dev.style.transform='scale('+scale+')';
   }
+  window.visualViewport?.addEventListener('resize',fit);
   window.addEventListener('resize', fit); fit();
 
   /* ---------- 路由 ---------- */
@@ -721,6 +724,7 @@ const App = (() => {
 
   /* ---------- 弹窗与 Toast ---------- */
   function openModal(kind,title,desc,actions){
+    title="演示："+title; desc="未连接车辆/后台，不会执行真实动作。以下仅为界面模拟："+desc;
     const icons={
       red:'<path d="M12 8v5M12 16.5h.01"/><circle cx="12" cy="12" r="9"/>',
       amber:'<path d="M12 9v4M12 16.5h.01"/><path d="M10.3 4 3 17a2 2 0 0 0 1.7 3h14.6a2 2 0 0 0 1.7-3L13.7 4a2 2 0 0 0-3.4 0Z"/>',
@@ -737,7 +741,7 @@ const App = (() => {
   function closeModal(){ $('modalMask').classList.remove('show'); }
   let toastTimer;
   function toast(msg){
-    const t=$('toast'); t.textContent=msg; t.classList.add('show');
+    const t=$('toast'); t.textContent='演示：未连接车辆/后台 · '+msg; t.classList.add('show');
     clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2200);
   }
 

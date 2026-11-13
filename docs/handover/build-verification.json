@@ -1,0 +1,18 @@
+{
+  "version": "1.0.1-board1",
+  "versionCode": 2,
+  "package": "com.omo.passenger",
+  "minSdk": 26,
+  "targetSdk": 37,
+  "nativeLibraries": [],
+  "abiRestriction": "无 native 库，无 ABI 过滤；ARM 板安装仍未测",
+  "signature": "Android Debug，内部测试",
+  "checks": [
+    "assembleDebug 成功",
+    "最终 HTML 无 webdriver 分支",
+    "两张本地图片逐字节一致",
+    "最终 HTML 无外部 src/href 或字体依赖"
+  ],
+  "androidRuntime": "本轮 adb devices 无设备，未测",
+  "board": "未测"
+}
